@@ -1,6 +1,7 @@
 mod editor;
 mod params;
 
+use std::num::NonZeroU32;
 use std::sync::atomic::{AtomicI32, Ordering};
 use std::sync::Arc;
 
@@ -141,14 +142,18 @@ impl Plugin for RandomMidiVst {
     const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
     const AUDIO_IO_LAYOUTS: &'static [AudioIOLayout] = &[AudioIOLayout {
-        main_input_channels: None,
-        main_output_channels: None,
+        // Some hosts (including Ableton in certain setups) won't instantiate plugins with
+        // completely empty audio layouts. We still behave as a MIDI generator, but expose a
+        // regular stereo layout for compatibility.
+        main_input_channels: NonZeroU32::new(2),
+        main_output_channels: NonZeroU32::new(2),
         aux_input_ports: &[],
         aux_output_ports: &[],
         names: PortNames::const_default(),
     }];
 
-    const MIDI_INPUT: MidiConfig = MidiConfig::None;
+    // Ableton expects VST3 instruments to expose a valid event input bus.
+    const MIDI_INPUT: MidiConfig = MidiConfig::Basic;
     const MIDI_OUTPUT: MidiConfig = MidiConfig::Basic;
 
     fn params(&self) -> Arc<dyn Params> {
@@ -213,7 +218,8 @@ impl ClapPlugin for RandomMidiVst {
 }
 
 impl Vst3Plugin for RandomMidiVst {
-    const VST3_CLASS_ID: [u8; 16] = *b"RandMidiVst00001";
+    // Bumped again so hosts won't reuse stale scan metadata.
+    const VST3_CLASS_ID: [u8; 16] = *b"RandMidiVst00003";
     const VST3_SUBCATEGORIES: &'static [Vst3SubCategory] =
         &[Vst3SubCategory::Instrument, Vst3SubCategory::Tools];
 }

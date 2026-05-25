@@ -42,6 +42,12 @@ Release-Bundle (VST3 + CLAP):
 cargo xtask bundle random_midi_vst --release
 ```
 
+Universal macOS-Build (Apple Silicon + Intel):
+
+```bash
+cargo xtask bundle-universal random_midi_vst --release
+```
+
 Ergebnis:
 
 ```text
@@ -83,6 +89,13 @@ oder systemweit:
 
 ```text
 /Library/Audio/Plug-Ins/VST3/
+```
+
+Nach dem Kopieren auf macOS (Gatekeeper/Quarantine-Fix):
+
+```bash
+xattr -dr com.apple.quarantine /Library/Audio/Plug-Ins/VST3/random_midi_vst.vst3
+codesign --force --deep --sign - /Library/Audio/Plug-Ins/VST3/random_midi_vst.vst3
 ```
 
 ### Windows (VST3)
