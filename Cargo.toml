@@ -1,0 +1,25 @@
+[package]
+name = "random_midi_vst"
+version = "0.1.0"
+edition = "2021"
+authors = ["Sven Graziani"]
+description = "Random MIDI note generator VST3 plugin"
+license = "MIT"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[workspace]
+members = ["xtask"]
+
+[dependencies]
+nice_plug = { package = "nice-plug", git = "https://codeberg.org/BillyDM/nice-plug.git", features = ["vst3", "standalone"] }
+nice_plug_egui = { package = "nice-plug-egui", git = "https://codeberg.org/BillyDM/nice-plug.git" }
+egui = "0.34.2"
+
+[profile.release]
+lto = "thin"
+strip = "symbols"
+
+[profile.dev]
+opt-level = 1
